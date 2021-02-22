@@ -52,3 +52,11 @@ def get_records(u1, u2):
             else : draw += 1
 
     return win, loss, draw
+
+def get_last_game(username):
+    months = get_month_played(username)
+    if months == None or len(months) == 0:
+        return None
+    month = months[-1]
+    games = get_month_games(username, month)
+    return games[-1]

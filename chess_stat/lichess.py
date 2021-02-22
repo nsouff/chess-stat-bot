@@ -1,7 +1,8 @@
 import requests
 import json
+
 def get_username(username):
-        r = requests.get(f'https://api.chess.com/pub/player/{username}')
+        r = requests.get(f'https://lichess.org/api/user/{username}')
         if r:
             return r.json()['username']
         else:
