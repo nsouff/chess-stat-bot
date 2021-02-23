@@ -62,11 +62,8 @@ async def get_records(u1, u2):
 
 async def get_last_game(username):
     months = await get_month_played(username)
-    print("BEF")
     if months == None or len(months) == 0:
         return None
-    print("OK")
     month = months[-1]
     games = await get_month_games(username, month)
-    print(games[-1]['white']['username'], games[-1]['black']['username'])
     return games[-1]
