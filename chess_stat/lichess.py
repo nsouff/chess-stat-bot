@@ -1,29 +1,37 @@
-import requests
+import aiohttp
 import json
 
-def get_username(username):
-        r = requests.get(f'https://lichess.org/api/user/{username}')
+async def get_username(username):
+        session = aiohttp.ClientSession()
+        r = await session.get(f'https://lichess.org/api/user/{username}')
+        ret = None
         if r:
-            return r.json()['username']
-        else:
-            return None
+            ret =  (await r.json())['username']
+        await session.close()
+        return ret
 
-def get_current_games(username):
-    r = requests.get(f'https://lichess.org/api/user/{username}')
+async def get_current_games(username):
+    session = aiohttp.ClientSession()
+    r = await session.get(f'https://lichess.org/api/user/{username}')
+    ret = None
     if r:
-        player = r.json()
+        player = await r.json()
         if 'playing' in player:
-            return player['count']['playing'], player['playing']
+            ret = player['count']['playing'], player['playing']
         else:
-            return player['count']['playing'], None
+            ret = player['count']['playing'], None
+    await session.close()
+    return ret
 
-def get_records(u1, u2):
+async def get_records(u1, u2):
+    session = aiohttp.ClientSession()
     params = {'vs': u2}
     headers = {'Accept': 'application/x-ndjson'}
-    r = requests.get(f'https://lichess.org/api/games/user/{u1}', headers=headers, params=params)
+    r = await session.get(f'https://lichess.org/api/games/user/{u1}', headers=headers, params=params)
+    ret = None
     if r:
         win = loss = draw = 0
-        games = [json.loads(s) for s in r.text.split("\n")[:-1]]
+        games = [json.loads(s) for s in (await r.text()).split("\n")[:-1]]
         for game in games:
             if 'winner' in game:
                 color_u1 = 'white' if game['players']['white']['user']['name'] == u1 else 'black'
@@ -35,6 +43,6 @@ def get_records(u1, u2):
             else:
                 draw += 1
 
-        return win, loss, draw
-    else:
-        return None
+        ret = (win, loss, draw)
+    await session.close()
+    return ret
