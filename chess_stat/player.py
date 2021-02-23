@@ -1,5 +1,5 @@
-import lichess
-import chesscom
+from . import lichess
+from . import chesscom
 
 class LichessUser():
     def __init__(self, username):
@@ -36,23 +36,22 @@ class Player():
     def __init__(self, lichess_name=None, chesscom_name=None):
         if (not lichess_name and not chesscom_name):
             raise ValueError("At least one account must be set")
+        self.li_account = self.com_account = None
         if lichess_name:
             self.li_account = LichessUser(lichess_name)
         if chesscom_name:
             self.com_account = ChessComUser(chesscom_name)
 
     def update(self):
-        ret = (None, None)
+        ret1 = ret2 = None
         if self.li_account:
-            ret[0] = self.li_account.update()
+            ret1 = self.li_account.update()
         if self.com_account:
-            ret[1] = self.com_account.update()
-        return ret
+            ret2 = self.com_account.update()
+        return ret1, ret2
 
     def set_li_account(self, lichess_name):
         self.li_account = LichessUser(lichess_name)
 
     def set_com_account(self, com_account):
         self.com_account = ChessComUser(com_account)
-
-    

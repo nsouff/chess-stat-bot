@@ -12,7 +12,7 @@ def get_current_games(username):
     r = requests.get(f'https://lichess.org/api/user/{username}')
     if r:
         player = r.json()
-        if player['count']['playing'] > 0:
+        if 'playing' in player:
             return player['count']['playing'], player['playing']
         else:
             return player['count']['playing'], None

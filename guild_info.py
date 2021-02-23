@@ -22,3 +22,12 @@ class GuildInfo():
 
     def set_wr_channel(self, wr_channel_id):
         self.wr_channel_id = wr_channel_id
+
+    def get_players(self, id=False):
+        if id:
+            return self.players.items()
+        else:
+            return self.players.keys()
+
+    def get_wr_channel(self):
+        return self.wr_channel_id
