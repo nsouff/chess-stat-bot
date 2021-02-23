@@ -1,44 +1,51 @@
-import requests
+import aiohttp
 
-def get_id(username):
-    r = requests.get(f'https://api.chess.com/pub/player/{username}')
+async def get_id(username):
+    session = aiohttp.ClientSession()
+    r = await session.get(f'https://api.chess.com/pub/player/{username}')
+    ret = None
     if r:
-        return r.json()['player_id']
-    else:
-        return None
+        ret = (await r.json())['player_id']
+    await session.close()
+    return ret
 
-def get_month_games(username, month):
-    r = requests.get(f'https://api.chess.com/pub/player/{username}/games/{month}')
+async def get_month_games(username, month):
+    session = aiohttp.ClientSession()
+    r = await session.get(f'https://api.chess.com/pub/player/{username}/games/{month}')
+    ret = None
     if r:
-        return r.json()['games']
-    else:
-        return None
+        ret = (await r.json())['games']
+    await session.close()
+    return ret
 
-def get_current_daily(username):
-    r = requests.get(f'https://api.chess.com/pub/player/{username}/games')
+async def get_current_daily(username):
+    session = aiohttp.ClientSession()
+    r = await session.get(f'https://api.chess.com/pub/player/{username}/games')
+    ret = None
     if r:
-        return r.json()['games']
-    else:
-        return None
+        ret = (await r.json())['games']
+    await session.close()
+    return ret
 
-def get_month_played(username):
-    r = requests.get(f'https://api.chess.com/pub/player/{username}/games/archives')
+async def get_month_played(username):
+    session = aiohttp.ClientSession()
+    r = await session.get(f'https://api.chess.com/pub/player/{username}/games/archives')
+    ret = None
     if r:
-        months = r.json()['archives']
-        return [month[-7:] for month in months]
-    else:
-        None
-
-def get_all_games(username):
-    months = get_month_played(username)
+        months = (await r.json())['archives']
+        ret = [month[-7:] for month in months]
+    await session.close()
+    return ret
+async def get_all_games(username):
+    months = await get_month_played(username)
     games = []
     for month in months:
-        games.extend(get_month_games(username, month))
+        games.extend(await get_month_games(username, month))
 
     return games
 
-def get_records(u1, u2):
-    games = get_all_games(u1)
+async def get_records(u1, u2):
+    games = await get_all_games(u1)
     win = 0
     draw = 0
     loss = 0
@@ -53,10 +60,13 @@ def get_records(u1, u2):
 
     return win, loss, draw
 
-def get_last_game(username):
-    months = get_month_played(username)
+async def get_last_game(username):
+    months = await get_month_played(username)
+    print("BEF")
     if months == None or len(months) == 0:
         return None
+    print("OK")
     month = months[-1]
-    games = get_month_games(username, month)
+    games = await get_month_games(username, month)
+    print(games[-1]['white']['username'], games[-1]['black']['username'])
     return games[-1]
