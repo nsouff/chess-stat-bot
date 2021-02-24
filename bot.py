@@ -90,19 +90,6 @@ async def set_channel(ctx):
         await ctx.send('Event message will be sent here')
         guilds_info[ctx.guild.id].set_wr_channel(ctx.channel.id)
 
-@bot.command()
-async def test(ctx):
-    embed=discord.Embed(title="Results", url="https://www.chess.com/game/live/7829635563", color=0x6c9d41)
-    embed.set_author(name="chess-bot", icon_url="https://images.chesscomfiles.com/uploads/v1/images_users/tiny_mce/SamCopeland/phpmeXx6V.png")
-    embed.add_field(name="wihte", value="nsouff:1000", inline=True)
-    embed.add_field(name="black", value="1ukq: 1000", inline=True)
-    embed.add_field(name="winner", value="nsouff", inline=False)
-    embed.set_footer(text='Bullet')
-    # embed.add_field(name=f'**{teamname}**', value=f'> Kills: {firstnum}\n> Position Pt: {secondnum}\n> Total Pt: {firstnum+secondnum}',inline=False)
-
-    await ctx.send(embed=embed)
-
-
 @bot.event
 async def on_ready():
     for guild in bot.guilds:
