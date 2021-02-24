@@ -1,5 +1,6 @@
 from . import lichess
 from . import chesscom
+import operator
 
 class LichessUser():
     @classmethod
@@ -19,6 +20,9 @@ class LichessUser():
         self.nb_games, self.game_link = nb_games, game_link
         return ret
 
+    async def get_records(self, lichess_user):
+        return await lichess.get_records(self.username, lichess_user.username)
+
 class ChessComUser():
     @classmethod
     async def create_com_user(cls, username):
@@ -36,6 +40,9 @@ class ChessComUser():
             ret = last_game
         self.last_game = last_game
         return ret
+
+    async def get_records(self, chesscom_user):
+        return await chesscom.get_records(self.username, chesscom_user.username)
 
 
 class Player():
@@ -63,3 +70,11 @@ class Player():
 
     async def set_com_account(self, com_account):
         self.com_account = await ChessComUser.create_com_user(com_account)
+
+    async def get_records(self, player, lichess=True, chesscom=True):
+        res = (0,0,0)
+        if lichess and self.li_account and player.li_account:
+            res = tuple(map(operator.add, res, await self.li_account.get_records(player.li_account)))
+        if chesscom and self.com_account and player.com_account:
+            res = tuple(map(operator.add, res, await self.com_account.get_records(player.com_account)))
+        return res

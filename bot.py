@@ -21,7 +21,7 @@ bot = commands.Bot(command_prefix='!')
 async def on_guild_join(guild):
     for chan in guild.text_channels:
         if chan.permissions_for(guild.me).send_messages:
-            await chan.send(f'Hi {guild.name}, events notifications will be sent here')
+            # await chan.send(f'Hi {guild.name}, events notifications will be sent here')
             guilds_info[guild.id] = GuildInfo(guild.id, chan.id)
             return
 
@@ -89,6 +89,27 @@ async def set_channel(ctx):
     if ctx.channel.permissions_for(ctx.guild.me).send_messages:
         await ctx.send('Event message will be sent here')
         guilds_info[ctx.guild.id].set_wr_channel(ctx.channel.id)
+
+@bot.command(name='stat', help='Display statistics about a user')
+async def stat(ctx, member: discord.Member, *args):
+    players = guilds_info[ctx.guild.id]
+    if not players.exists(ctx.author.id):
+        await ctx.send('You must register your lichess or chess.com account first')
+        return
+    if not players.exists(member.id):
+        await ctx.send(f'<@{member.id}> must register his lichess or chess.com account first')
+        return
+    lichess = chesscom = False
+    if 'lichess' in args:
+        lichess = True
+    elif 'chesscom' in args:
+        chesscom = True
+    else:
+        lichess = chesscom = True
+    win, loss, draw = await players.get_records(ctx.author.id, member.id, lichess=lichess, chesscom=chesscom)
+    await ctx.send(f'{win} **W** | {loss} **L** | {draw} **D**')
+
+
 
 @bot.event
 async def on_ready():

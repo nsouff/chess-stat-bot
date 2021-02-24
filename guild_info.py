@@ -29,8 +29,14 @@ class GuildInfo():
         else:
             return self.players.keys()
 
+    def get_player(self, id):
+        return self.players[id]
+
     def get_wr_channel(self):
         return self.wr_channel_id
 
     def exists(self, discord_id):
         return discord_id in self.players
+
+    async def get_records(self, id1, id2, lichess=True, chesscom=True):
+        return await self.players[id1].get_records(self.players[id2], lichess=lichess, chesscom=chesscom)
