@@ -1,7 +1,9 @@
 import os
 
-import discord
 from dotenv import load_dotenv
+import pickle
+
+import discord
 from discord.ext import tasks, commands
 from discord.ext.commands import has_permissions
 from discord.utils import find
@@ -13,7 +15,7 @@ guilds_info = {}
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
-
+guilds_file = '.guilds.plk'
 
 bot = commands.Bot(command_prefix='!')
 
@@ -63,6 +65,12 @@ async def end_game_detection():
                     embed.add_field(name='Rules', value=last_game['rules'], inline=True)
                     await channel.send(embed=embed)
 
+@tasks.loop(minutes=2)
+async def save():
+    await bot.wait_until_ready()
+    with open(guilds_file, 'wb') as f:
+        pickle.dump(guilds_info, f, pickle.HIGHEST_PROTOCOL)
+
 @bot.command(name='com_add', help='Link a chess.com account to your discord account in this guild')
 async def com_add(ctx, com_account):
     players = guilds_info[ctx.guild.id]
@@ -109,17 +117,26 @@ async def stat(ctx, member: discord.Member, *args):
     win, loss, draw = await players.get_records(ctx.author.id, member.id, lichess=lichess, chesscom=chesscom)
     await ctx.send(f'{win} **W** | {loss} **L** | {draw} **D**')
 
-
+def load_guilds():
+    with open(guilds_file, 'rb') as f:
+        return pickle.load(f)
 
 @bot.event
 async def on_ready():
+    global guilds_info
+    try:
+        guilds_info = load_guilds()
+    except (FileNotFoundError, pickle.PickleError):
+        print("erorr")
+        guilds_info = {}
     for guild in bot.guilds:
-        await on_guild_join(guild)
+        if guild.id not in guilds_info:
+            await on_guild_join(guild)
         print(f'{guild}(id: {guild.id})')
-
     print(f'{bot.user} has connected to Discord!')
     live_detection.start()
     end_game_detection.start()
+    save.start()
 
 
 
