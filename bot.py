@@ -23,7 +23,6 @@ bot = commands.Bot(command_prefix='!')
 async def on_guild_join(guild):
     for chan in guild.text_channels:
         if chan.permissions_for(guild.me).send_messages:
-            # await chan.send(f'Hi {guild.name}, events notifications will be sent here')
             guilds_info[guild.id] = GuildInfo(guild.id, chan.id)
             return
 
@@ -60,9 +59,10 @@ async def end_game_detection():
                     elif last_game['black']['result'] == 'win':
                         winner = 'Black'
                     embed.add_field(name='White', value=f'> Username: {last_game["white"]["username"]}\n> Rating: {last_game["white"]["rating"]}', inline=False)
-                    embed.add_field(name='Black', value=f'> Username: {last_game["black"]["username"]}\n> Rating: {last_game["white"]["rating"]}', inline=False)
+                    embed.add_field(name='Black', value=f'> Username: {last_game["black"]["username"]}\n> Rating: {last_game["black"]["rating"]}', inline=False)
                     embed.add_field(name='Time class', value=last_game['time_class'], inline=True)
                     embed.add_field(name='Rules', value=last_game['rules'], inline=True)
+                    embed.add_field(name='Winner', value=winner)
                     await channel.send(embed=embed)
 
 @tasks.loop(minutes=2)
